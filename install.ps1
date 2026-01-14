@@ -42,3 +42,26 @@ Link-Resource -LinkPath "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8w
 
 # PowerShell Profile
 Link-Resource -LinkPath $PROFILE -RepoPath "powershell\Microsoft.PowerShell_profile.ps1"
+
+# --- Global Hotkey ---
+
+function Set-TerminalHotkey {
+    Write-Host "Setting up Ctrl+Alt+T hotkey..."
+    
+    $ShortcutPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Terminal_Global.lnk"
+    
+    $TargetExe = "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe"
+
+    $WshShell = New-Object -comObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
+    
+    $Shortcut.TargetPath = $TargetExe
+    $Shortcut.Hotkey = "Ctrl+Alt+T" 
+    $Shortcut.WindowStyle = 2
+    
+    $Shortcut.Save()
+    
+    Write-Host "Linked Ctrl+Alt+T to Terminal"
+}
+
+Set-TerminalHotkey
