@@ -1,32 +1,41 @@
 $DotfilesPath = $PSScriptRoot
 
-function Link-Config {
+function Link-Resource {
     param (
         [string]$LinkPath,
-        [string]$TargetName
+        [string]$RepoPath
     )
 
-    $Target = "$DotfilesPath\$TargetName"
+    $Source = "$DotfilesPath\$RepoPath"
 
-    if (-not (Test-Path $Target)) {
-        Write-Warning "$TargetName not found in repository."
+    if (-not (Test-Path $Source)) {
+        Write-Warning "$RepoPath not found in repository."
         return
     }
 
     if (Test-Path $LinkPath) {
         $Item = Get-Item $LinkPath
         if ($Item.LinkType -eq "Junction" -or $Item.LinkType -eq "SymbolicLink") {
-            Write-Host "$TargetName is already linked."
+            Write-Host "$RepoPath is already linked."
             return
         }
 
         $BackupName = "$LinkPath.backup.$(Get-Date -Format 'yyyyMMdd-HHmm')"
-        Write-Warning "Existing $TargetName found. Renamed to $BackupName"
+        Write-Warning "Existing resource found. Renamed to $BackupName"
         Rename-Item -Path $LinkPath -NewName $BackupName
     }
 
-    New-Item -ItemType Junction -Path $LinkPath -Target $Target | Out-Null
-    Write-Host "Linked $TargetName"
+    $IsDir = (Get-Item $Source).PSIsContainer
+    $Type = if ($IsDir) { "Junction" } else { "SymbolicLink" }
+
+    New-Item -ItemType $Type -Path $LinkPath -Target $Source | Out-Null
+    Write-Host "Linked $RepoPath ($Type)"
 }
 
-Link-Config -LinkPath "$env:LOCALAPPDATA\nvim" -TargetName "nvim"
+# --- Configs ---
+
+# Neovim
+Link-Resource -LinkPath "$env:LOCALAPPDATA\nvim" -RepoPath "nvim"
+
+# Windows Terminal
+Link-Resource -LinkPath "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json" -RepoPath "windows-terminal\settings.json"
