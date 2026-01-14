@@ -39,3 +39,6 @@ Link-Resource -LinkPath "$env:LOCALAPPDATA\nvim" -RepoPath "nvim"
 
 # Windows Terminal
 Link-Resource -LinkPath "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json" -RepoPath "windows-terminal\settings.json"
+
+# PowerShell Profile
+Link-Resource -LinkPath $PROFILE -RepoPath "powershell\Microsoft.PowerShell_profile.ps1"
