@@ -1,4 +1,5 @@
-oh-my-posh init pwsh --config 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/catppuccin_mocha.omp.json' | Invoke-Expression
+# oh-my-posh init pwsh --config "$HOME/.config/ohmyposh/imprfct.omp.json" | Invoke-Expression
+. "$HOME/.config/ohmyposh/omb-init.ps1"
 
 Import-Module -Name Terminal-Icons
 Set-PSReadLineOption -PredictionSource History
@@ -15,3 +16,8 @@ Set-PSReadLineOption -Colors @{
 Set-Alias vim nvim
 Set-Alias ll ls
 Set-Alias g git
+
+function ls { lsd $args }
+function ll { lsd -l $args }
+function la { lsd -a $args }
+function lla { lsd -la $args }
