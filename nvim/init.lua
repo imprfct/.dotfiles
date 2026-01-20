@@ -90,8 +90,13 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.softtabstop = 4
+vim.opt.expandtab = true
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -99,10 +104,10 @@ vim.g.have_nerd_font = false
 --  For more options, you can see `:help option-list`
 
 -- Make line numbers default
-vim.o.number = true
+-- vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = "a"
@@ -248,7 +253,8 @@ rtp:prepend(lazypath)
 require("lazy").setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   "NMAC427/guess-indent.nvim", -- Detect tabstop and shiftwidth automatically
-
+  "ThePrimeagen/vim-be-good",
+  "windwp/nvim-ts-autotag",
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -349,6 +355,133 @@ require("lazy").setup({
         { "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
       },
     },
+  },
+
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = true,
+    -- use opts = {} for passing setup options
+    -- this is equalent to setup({}) function
+  },
+
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    config = function()
+      require("toggleterm").setup {
+        size = 20,
+        shell = "powershell",
+        open_mapping = [[<c-\>]],
+        direction = "float",
+        float_opts = {
+          border = "curved",
+          winblend = 0,
+        },
+        shade_terminals = true,
+      }
+
+      local Terminal = require("toggleterm.terminal").Terminal
+
+      local lazygit = Terminal:new {
+        cmd = "lazygit",
+        hidden = true,
+        direction = "float",
+        float_opts = {
+          border = "double",
+          winblend = 0,
+        },
+        on_open = function(term)
+          vim.cmd "startinsert!"
+          vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", { noremap = true, silent = true })
+        end,
+      }
+
+      function _lazygit_toggle()
+        lazygit:toggle()
+      end
+
+      vim.keymap.set(
+        "n",
+        "<leader>lg",
+        "<cmd>lua _lazygit_toggle()<CR>",
+        { noremap = true, silent = true, desc = "Toggle LazyGit" }
+      )
+
+      local jj = Terminal:new {
+        cmd = "jj log",
+        hidden = true,
+        direction = "float",
+        float_opts = {
+          border = "curved",
+          title = " Jujutsu ",
+          winblend = 0,
+        },
+        on_open = function(term)
+          vim.cmd "startinsert!"
+        end,
+        close_on_exit = true,
+      }
+
+      function _jj_toggle()
+        jj:toggle()
+      end
+
+      vim.keymap.set(
+        "n",
+        "<leader>j",
+        "<cmd>lua _jj_toggle()<CR>",
+        { noremap = true, silent = true, desc = "Toggle JJ Log" }
+      )
+    end,
+  },
+  {
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local harpoon = require "harpoon"
+
+      harpoon:setup {}
+
+      vim.keymap.set("n", "<leader>a", function()
+        harpoon:list():add()
+      end, { desc = "[A]dd to Harpoon list" })
+
+      vim.keymap.set("n", "<C-e>", function()
+        harpoon.ui:toggle_quick_menu(harpoon:list())
+      end, { desc = "Open Harpoon Menu" })
+
+      vim.keymap.set("n", "<C-t>", function()
+        harpoon:list():select(2)
+      end)
+      vim.keymap.set("n", "<C-n>", function()
+        harpoon:list():select(3)
+      end)
+      vim.keymap.set("n", "<C-s>", function()
+        harpoon:list():select(4)
+      end)
+
+      vim.keymap.set("n", "<leader>1", function()
+        harpoon:list():select(1)
+      end, { desc = "Harpoon File 1" })
+      vim.keymap.set("n", "<leader>2", function()
+        harpoon:list():select(2)
+      end, { desc = "Harpoon File 2" })
+      vim.keymap.set("n", "<leader>3", function()
+        harpoon:list():select(3)
+      end, { desc = "Harpoon File 3" })
+      vim.keymap.set("n", "<leader>4", function()
+        harpoon:list():select(4)
+      end, { desc = "Harpoon File 4" })
+
+      vim.keymap.set("n", "<C-S-P>", function()
+        harpoon:list():prev()
+      end)
+      vim.keymap.set("n", "<C-S-N>", function()
+        harpoon:list():next()
+      end)
+    end,
   },
 
   -- NOTE: Plugins can specify dependencies.
@@ -697,6 +830,22 @@ require("lazy").setup({
         -- ts_ls = {},
         --
 
+        ts_ls = {},
+
+        html = { filetypes = { "html", "twig", "hbs" } },
+        cssls = {},
+
+        jsonls = {},
+
+        eslint = {
+          settings = {
+            codeActionOnSave = {
+              enable = true,
+              mode = "all",
+            },
+          },
+        },
+
         lua_ls = {
           -- cmd = { ... },
           -- filetypes = { ... },
@@ -774,13 +923,10 @@ require("lazy").setup({
         },
       }
 
-      -- Настраиваем Omnisharp по-новому для Neovim 0.11
       local omnisharp_opts = servers.omnisharp
 
-      -- Обязательно добавляем capabilities (как это делается автоматически для других серверов выше)
       omnisharp_opts.capabilities = vim.tbl_deep_extend("force", {}, capabilities, omnisharp_opts.capabilities or {})
 
-      -- Регистрируем конфигурацию и включаем сервер
       vim.lsp.config["omnisharp"] = omnisharp_opts
       vim.lsp.enable "omnisharp"
     end,
@@ -819,6 +965,13 @@ require("lazy").setup({
       formatters_by_ft = {
         lua = { "stylua" },
         cs = { "csharpier" },
+        javascript = { "prettierd" },
+        typescript = { "prettierd" },
+        javascriptreact = { "prettierd" },
+        typescriptreact = { "prettierd" },
+        css = { "prettierd" },
+        html = { "prettierd" },
+        json = { "prettierd" },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -886,7 +1039,7 @@ require("lazy").setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = "default",
+        preset = "enter",
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -1012,6 +1165,11 @@ require("lazy").setup({
         "query",
         "vim",
         "vimdoc",
+        "javascript",
+        "typescript",
+        "tsx",
+        "css",
+        "json",
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
@@ -1082,3 +1240,8 @@ require("lazy").setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down half page and center" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up half page and center" })
+vim.keymap.set("n", "n", "nzzzv", { desc = "Scroll up to next find result" })
+vim.keymap.set("n", "N", "Nzzzv", { desc = "Scroll up to previous find result" })
