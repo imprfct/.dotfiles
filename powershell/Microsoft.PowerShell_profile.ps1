@@ -1,5 +1,4 @@
-# oh-my-posh init pwsh --config "$HOME/.config/ohmyposh/imprfct.omp.json" | Invoke-Expression
-. "$HOME/.config/ohmyposh/omb-init.ps1"
+oh-my-posh init pwsh --config "$HOME/.config/ohmyposh/imprfct.omp.json" | Invoke-Expression
 
 Import-Module -Name Terminal-Icons
 Set-PSReadLineOption -PredictionSource History
