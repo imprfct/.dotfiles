@@ -109,6 +109,8 @@ vim.g.have_nerd_font = true
 --  Experiment for yourself to see if you like it!
 vim.o.relativenumber = true
 
+vim.opt.colorcolumn = "80"
+
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = "a"
 
@@ -254,7 +256,10 @@ require("lazy").setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   "NMAC427/guess-indent.nvim", -- Detect tabstop and shiftwidth automatically
   "ThePrimeagen/vim-be-good",
-  "windwp/nvim-ts-autotag",
+  {
+    "windwp/nvim-ts-autotag",
+    opts = {},
+  },
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -832,8 +837,24 @@ require("lazy").setup({
 
         ts_ls = {},
 
+        emmet_language_server = {
+          filetypes = {
+            "css",
+            "html",
+            "javascript",
+            "javascriptreact",
+            "less",
+            "sass",
+            "scss",
+            "pug",
+            "typescriptreact",
+            "astro",
+          },
+        },
+
         html = { filetypes = { "html", "twig", "hbs" } },
         cssls = {},
+        tailwindcss = {},
 
         jsonls = {},
 
@@ -845,6 +866,8 @@ require("lazy").setup({
             },
           },
         },
+
+        astro = {},
 
         lua_ls = {
           -- cmd = { ... },
@@ -972,6 +995,7 @@ require("lazy").setup({
         css = { "prettierd" },
         html = { "prettierd" },
         json = { "prettierd" },
+        astro = { "prettierd" },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -1039,7 +1063,7 @@ require("lazy").setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = "enter",
+        preset = "super-tab",
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -1170,6 +1194,7 @@ require("lazy").setup({
         "tsx",
         "css",
         "json",
+        "astro",
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
