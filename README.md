@@ -1,20 +1,11 @@
 # dotfiles (macOS)
 
-Минимальный набор: `zsh`, `oh-my-zsh`, `vim` fallback, `nvim`, `ghostty`.
+Minimal setup for `zsh`, `oh-my-zsh`, `vim` fallback, `nvim`, and `ghostty`.
 
-## 1) Первый пуш ветки `macOS`
-
-```bash
-git checkout macOS
-git add .
-git commit -m "macOS dotfiles bootstrap"
-git push -u origin macOS
-```
-
-## 2) Быстрый старт на новом Mac
+## 1) Quick Start on a New Mac
 
 ```bash
-xcode-select --install # один раз
+xcode-select --install # once
 git clone https://github.com/<USER>/<REPO>.git ~/.dotfiles
 cd ~/.dotfiles
 git checkout macOS
@@ -23,31 +14,31 @@ make link
 exec zsh
 ```
 
-## 3) Обновить и пересинкать
+## 2) Update and Re-sync
 
 ```bash
 cd ~/.dotfiles
 make sync
 ```
 
-## 4) Держать всегда в синке (опционально)
+## 3) Keep It in Sync Automatically (optional)
 
 ```bash
 cd ~/.dotfiles
 make autosync-install
 ```
 
-Это ставит `launchd`-агент и делает `make sync` каждые 30 минут.
-Лог: `~/Library/Logs/dotfiles-sync.log`.
+This installs a `launchd` agent and runs `make sync` every 30 minutes.
+Log file: `~/Library/Logs/dotfiles-sync.log`.
 
-Удалить:
+Remove it:
 
 ```bash
 cd ~/.dotfiles
 make autosync-remove
 ```
 
-## Что синкается
+## Managed Links
 
 - `zsh/.zshrc -> ~/.zshrc`
 - `zsh/.zprofile -> ~/.zprofile`
@@ -55,4 +46,4 @@ make autosync-remove
 - `config/nvim -> ~/.config/nvim`
 - `config/ghostty -> ~/.config/ghostty`
 
-`make link` перед заменой делает бэкап в `~/.dotfiles-backup/<timestamp>/...`.
+`make link` creates backups before replacing files in `~/.dotfiles-backup/<timestamp>/...`.
