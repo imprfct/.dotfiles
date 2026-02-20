@@ -9,8 +9,7 @@ xcode-select --install # once
 git clone https://github.com/<USER>/<REPO>.git ~/.dotfiles
 cd ~/.dotfiles
 git checkout macOS
-make bootstrap
-make link
+make install
 exec zsh
 ```
 
@@ -19,23 +18,6 @@ exec zsh
 ```bash
 cd ~/.dotfiles
 make sync
-```
-
-## 3) Keep It in Sync Automatically (optional)
-
-```bash
-cd ~/.dotfiles
-make autosync-install
-```
-
-This installs a `launchd` agent and runs `make sync` every 30 minutes.
-Log file: `~/Library/Logs/dotfiles-sync.log`.
-
-Remove it:
-
-```bash
-cd ~/.dotfiles
-make autosync-remove
 ```
 
 ## Managed Links

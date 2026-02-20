@@ -1,21 +1,17 @@
 SHELL := /bin/bash
 
-.PHONY: bootstrap link sync autosync-install autosync-remove status
+.PHONY: bootstrap sync link install status
 
 bootstrap:
 	./scripts/bootstrap.sh
 
-link:
-	./scripts/link.sh
-
 sync:
 	./scripts/sync.sh macOS
 
-autosync-install:
-	./scripts/install-autosync.sh
+link:
+	./scripts/link.sh
 
-autosync-remove:
-	./scripts/remove-autosync.sh
+install: bootstrap sync
 
 status:
 	@git status --short --branch
