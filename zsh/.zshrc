@@ -124,10 +124,13 @@ if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd --shell zsh)"
 fi
 
-# .NET for C#/Unity tooling (OmniSharp).
-export DOTNET_ROOT="/opt/homebrew/opt/dotnet@9/libexec"
-export PATH="/opt/homebrew/opt/dotnet@9/bin:$PATH"
-
 # Always open our Neovim config.
 alias vim='nvim'
 alias envim='nvim'
+export PATH="$HOME/.local/bin:$PATH"
+
+# Vite+ bin (https://viteplus.dev)
+. "$HOME/.vite-plus/env"
+
+alias python=python3
+alias pip="python -m pip"
