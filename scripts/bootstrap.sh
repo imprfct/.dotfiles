@@ -34,7 +34,7 @@ load_brew_env() {
 
 install_packages() {
   local packages
-  packages=(git neovim fnm fzf ripgrep fd zsh-autosuggestions)
+  packages=(git neovim fnm fzf ripgrep fd zsh-autosuggestions tree-sitter odin ols)
 
   log "Installing brew packages: ${packages[*]}"
   brew install "${packages[@]}"

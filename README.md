@@ -1,6 +1,6 @@
 # dotfiles (macOS)
 
-Minimal setup for `zsh`, `oh-my-zsh`, `vim` fallback, `nvim`, and `ghostty`.
+Minimal setup for `zsh`, `oh-my-zsh`, `vim` fallback, `nvim`, `ghostty`, and Odin development with Tree-sitter and OLS.
 
 ## 1) Quick Start on a New Mac
 

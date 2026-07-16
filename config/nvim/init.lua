@@ -642,6 +642,7 @@ require('lazy').setup({
 
         -- Backend / infra
         gopls = {},
+        ols = {},
         bashls = {},
         dockerls = {},
         docker_compose_language_service = {},
@@ -664,7 +665,7 @@ require('lazy').setup({
       --    :Mason
       --
       -- You can press `g?` for help in this menu.
-      local lsp_servers = vim.tbl_keys(servers or {})
+      local lsp_servers = vim.tbl_filter(function(name) return name ~= 'ols' end, vim.tbl_keys(servers or {}))
       table.insert(lsp_servers, 'lua_ls')
       require('mason-lspconfig').setup {
         ensure_installed = lsp_servers,
@@ -920,8 +921,11 @@ require('lazy').setup({
 
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    lazy = false,
     build = ':TSUpdate',
     config = function()
+      require('nvim-treesitter').install { 'odin' }
+
       vim.api.nvim_create_autocmd('FileType', {
         pattern = '*',
         callback = function(args) pcall(vim.treesitter.start, args.buf) end,
