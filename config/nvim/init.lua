@@ -288,14 +288,15 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 
 vim.api.nvim_create_autocmd('FileType', {
-  desc = 'Use four-space indentation for Odin',
+  desc = 'Use the Odin community indentation style',
   group = vim.api.nvim_create_augroup('odin-indentation', { clear = true }),
   pattern = 'odin',
   callback = function()
-    vim.bo.expandtab = true
+    vim.bo.expandtab = false
     vim.bo.shiftwidth = 4
-    vim.bo.softtabstop = 4
+    vim.bo.softtabstop = 0
     vim.bo.tabstop = 4
+    vim.wo.colorcolumn = '101'
   end,
 })
 
@@ -721,6 +722,9 @@ require('lazy').setup({
         gopls = {},
         ols = {
           flags = { debounce_text_changes = 150 },
+          init_options = {
+            checker_args = '-vet -strict-style -vet-tabs -disallow-do -warnings-as-errors',
+          },
         },
         bashls = {},
         dockerls = {},
