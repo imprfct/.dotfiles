@@ -89,7 +89,6 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-local nvim_start_cwd = vim.fn.getcwd()
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
@@ -199,33 +198,60 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
-local terminal_buf = nil
+local terminal = { buf = nil, win = nil }
+
+local function terminal_is_running(buf)
+  if not buf or not vim.api.nvim_buf_is_valid(buf) then return false end
+
+  local channel = vim.bo[buf].channel
+  return channel > 0 and vim.fn.jobwait({ channel }, 0)[1] == -1
+end
+
 local function toggle_terminal()
-  if terminal_buf and vim.api.nvim_buf_is_valid(terminal_buf) then
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      if vim.api.nvim_win_get_buf(win) == terminal_buf then
-        vim.api.nvim_win_close(win, true)
-        return
-      end
-    end
+  if terminal.win and vim.api.nvim_win_is_valid(terminal.win) then
+    vim.api.nvim_win_close(terminal.win, true)
+    terminal.win = nil
+    return
   end
 
-  vim.cmd 'botright 12split'
+  if not terminal_is_running(terminal.buf) then
+    if terminal.buf and vim.api.nvim_buf_is_valid(terminal.buf) then vim.api.nvim_buf_delete(terminal.buf, { force = true }) end
 
-  if terminal_buf and vim.api.nvim_buf_is_valid(terminal_buf) then
-    vim.api.nvim_win_set_buf(0, terminal_buf)
+    vim.cmd 'botright 12new'
+    terminal.buf = vim.api.nvim_get_current_buf()
+    terminal.win = vim.api.nvim_get_current_win()
+    vim.bo[terminal.buf].bufhidden = 'hide'
+    vim.bo[terminal.buf].buflisted = false
+    vim.fn.jobstart(vim.o.shell, { cwd = vim.fn.getcwd(), term = true })
   else
-    terminal_buf = vim.api.nvim_get_current_buf()
-    vim.bo[terminal_buf].buflisted = false
-    vim.fn.termopen(vim.o.shell, { cwd = nvim_start_cwd })
+    vim.cmd 'botright 12split'
+    terminal.win = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_set_buf(terminal.win, terminal.buf)
   end
 
   vim.cmd.startinsert()
 end
 
-vim.keymap.set('n', '<leader>tt', toggle_terminal, { desc = '[T]oggle [T]erminal' })
+local function run_file(command)
+  local cwd = vim.fn.expand '%:p:h'
+  vim.cmd.update()
+  vim.cmd 'botright 12new'
+
+  local buf = vim.api.nvim_get_current_buf()
+  vim.bo[buf].bufhidden = 'wipe'
+  vim.bo[buf].buflisted = false
+  vim.fn.jobstart(command, { cwd = cwd, term = true })
+  vim.cmd.startinsert()
+end
+
+vim.keymap.set({ 'n', 't' }, '<leader>tt', toggle_terminal, { desc = '[T]oggle [T]erminal' })
+vim.keymap.set('n', '<leader>ro', function()
+  local file = vim.fn.expand '%:p'
+  run_file { 'odin', 'run', file, '-file' }
+end, { desc = '[R]un [O]din file' })
 vim.keymap.set('n', '<leader>rp', function()
-  vim.cmd('botright 12split | terminal python ' .. vim.fn.shellescape(vim.fn.expand '%:p'))
+  local file = vim.fn.expand '%:p'
+  run_file { 'python3', file }
 end, { desc = '[R]un [P]ython file' })
 
 -- TIP: Disable arrow keys in normal mode
@@ -261,6 +287,18 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function() vim.hl.on_yank() end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+  desc = 'Use four-space indentation for Odin',
+  group = vim.api.nvim_create_augroup('odin-indentation', { clear = true }),
+  pattern = 'odin',
+  callback = function()
+    vim.bo.expandtab = true
+    vim.bo.shiftwidth = 4
+    vim.bo.softtabstop = 4
+    vim.bo.tabstop = 4
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -287,7 +325,10 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added via a link or github org/name. To run setup automatically, use `opts = {}`
-  { 'NMAC427/guess-indent.nvim', opts = {} },
+  {
+    'NMAC427/guess-indent.nvim',
+    opts = { filetype_exclude = { 'netrw', 'tutor', 'odin' } },
+  },
 
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
@@ -343,6 +384,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
+        { '<leader>r', group = '[R]un' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>m', group = '[M]arks (Harpoon)' },
       },
@@ -677,7 +719,9 @@ require('lazy').setup({
 
         -- Backend / infra
         gopls = {},
-        ols = {},
+        ols = {
+          flags = { debounce_text_changes = 150 },
+        },
         bashls = {},
         dockerls = {},
         docker_compose_language_service = {},
@@ -799,8 +843,14 @@ require('lazy').setup({
         yaml = { 'prettierd', 'prettier', stop_after_first = true },
         markdown = { 'prettierd', 'prettier', stop_after_first = true },
         python = { 'ruff_organize_imports', 'ruff_format' },
+        odin = { 'odinfmt' },
         sh = { 'shfmt' },
         go = { 'gofumpt', 'goimports' },
+      },
+      formatters = {
+        odinfmt = {
+          args = { '-stdin', '-config:' .. vim.fn.stdpath('config') .. '/odin/odinfmt.json' },
+        },
       },
     },
   },
